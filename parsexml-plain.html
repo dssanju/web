@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>XML PARSING</title>
+<script type="text/javascript" src="zxml.src.js"></script>
+<script type="text/javascript">
+headerArr = ["ITEM", "COMPANY", "PRICE"];
+function loadXML()
+{
+	//IE does it with ActiveX
+	try
+	{
+		if(navigator.appName == "Microsoft Internet Explorer")
+		{
+			xmldom = new ActiveXObject("MSXML2.DOMDOCUMENT.6.0");
+			xmlstr = "<devices><device><item>Phone</item><price>30000</price></device></devices>";
+			//set some properties
+			//xmldom.async = true;
+			xmldom.validateOnParse = false;
+			xmldom.preserveWhiteSpace = false;
+			
+			//Register the callback
+			//xmldom.onreadystatechange = processResults;
+			
+			//Load the xml
+			//xmldom.load("http://localhost/devices.xml");
+			xmldom.loadXML(xmlstr);
+			//Further code as below
+		}
+		else //Other browsers
+		{
+			//No activex
+			/*xmldom = document.implementation.createDocument("","",null);
+			//xmldom.onload = procRes;
+			//xmldom.load("http://localhost/devices.xml");
+			xmlstr = "<devices><device><item>Phone</item><price>30000</price></device></devices>";
+			domparser = new DOMParser();
+			xmldom = domparser.parseFromString(xmlstr,"text/xml");
+		
+			serializer = new XMLSerializer();
+			str = serializer.serializeToString(xmldom.documentElement);
+			alert(str);*/
+			
+			xmldom = zXmlDom.createDocument();
+			xmldom.async = false;
+			
+			xmldom.load("http://localhost/devices.xml");
+			alert(xmldom.documentElement.text);
+			
+		}	
+	}
+	catch(exception)
+	{
+		alert("No ActiveX found");
+	}
+}
+
+function procRes()
+{
+
+	//ALert the serialized value
+	serializer = new XMLSerializer();
+	str = serializer.serializeToString(xmldom.documentElement);
+	alert(str);
+
+}
+function processResults()
+{
+	if(xmldom.parseError.errorCode != 0)
+	{
+		alert(xmldom.parseError.reason);
+		alert(xmldom.parseError.line);
+		return;
+	}
+	if(xmldom.readyState == 4)
+	{
+		root = xmldom.documentElement;
+		//Convert the xml into an HTML table
+		
+		table = document.createElement("table");
+		table.setAttribute("border",2);
+		table.setAttribute("cellspacing",2);
+		table.setAttribute("cellpadding",4);
+		hrow = document.createElement("tr");
+		
+		for(j=0;j<3;j++)
+		{
+			hcell = document.createElement("td");
+			hcell.innerHTML = headerArr[j];
+			hrow.appendChild(hcell);
+		}
+		table.appendChild(hrow);
+		//Add data cells
+		for(k=0;k<root.childNodes.length;k++)
+		{
+			datarow = document.createElement("tr");
+			
+			item1 = root.childNodes[k].firstChild.text;
+			company = root.childNodes[k].firstChild.nextSibling.text;
+			price = root.childNodes[k].lastChild.text;
+		
+			datacell = document.createElement("td");
+			datacell.innerHTML = item1;
+			datarow.appendChild(datacell);
+			
+			datacell = document.createElement("td");
+			datacell.innerHTML = company;
+			datarow.appendChild(datacell);
+			
+			datacell = document.createElement("td");
+			datacell.innerHTML = price;
+			datarow.appendChild(datacell);
+		
+			table.appendChild(datarow);
+		}
+		
+		document.body.appendChild(table);
+		
+		alert(xmldom.xml);
+		
+	}
+}
+</script>
+</head>
+<body onload="loadXML()">
+</body>
+</html>
